@@ -3,8 +3,8 @@ from object import Point, Vector
 
 class Camera(object):
 	def __init__(position, look_at):
-		self.position = position
-		self.look_at = look_at
+		self.position = Point.__init__("camera", position)
+		self.look_at = Point.__init__("look_at", look_at)
 		self.avup = look_at + [0, 0, 1, 0]
 		self.i
 		self.j
@@ -37,7 +37,7 @@ class Camera(object):
 
 	def build_window(params):
 		points_window = np.matlib.zeros(n, m)
-		
+
 		d = params[0]
 		n = params[1]
 		m = params[2]

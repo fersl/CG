@@ -6,9 +6,15 @@ class Point(object):
 		self.id = point_id
 		self.coordinates = np.array(coordinates_list)
 
+	def to_vector(self):
+		vector = Vector.__init__([0, 0, 0, 1], self.coordinates)
+		return vector
+
 
 class Vector(object):
 	def __init__(self, point1, point2):
+		self.point1 = point1
+		self.point2 = point2
 		self.coordinates = point2.coordinates - point1.coordinates
 
 	def normalize(self):
@@ -17,7 +23,9 @@ class Vector(object):
 		self.coordinates[-1] = 0
 		return self
 
-	#def find
+	def aura_interception(self, object):
+
+	def face_interception(self, face):
 
 
 class Face:
@@ -36,15 +44,16 @@ class Face:
 class Object:
 	def __init__(self, obj_id):
 		self.id = obj_id
+		#turn lists of vertices and faces into dictionaries using their id as key
 		self.vertices = []
 		self.faces = []
 
-	def add_vertices(self, x, y, z):
+	def add_vertice(self, x, y, z):
 		vertice_id = len(self.vertices)+1
 		vertice = Point.__init__(vertice_id, [x, y, z, 1])
 		self.vertices.append(vertice)
 
-	def add_faces(self, p1, p2, p3):
+	def add_face(self, p1, p2, p3):
 		face_id = len(self.faces)+1
 		face = Face.__init__(face_id, [p1, p2, p3])
 		self.faces.append(face)
@@ -53,11 +62,11 @@ class Object:
 		for p in self.vertices:
 			p = np.dot(matrix, p)
 
-	def aura_interception (self, ):
+	#def aura_interception (self, ):
 
 	def backface_culling(self, Pij):
 		faces_list = []
-		ray = Vector.__init__([0, 0, 0, 1], Pij).calculate_normal()
+		ray = Pij.calculate_normal()
 		for f in self.faces:
 			v = f.calculate_normal
 			if np.dot(v, ray) < 0

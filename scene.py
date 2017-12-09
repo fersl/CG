@@ -16,6 +16,10 @@ class Scene(object):
 		#ler arquivo e adicionar vertices e faces aqui
 		self.objects.append(obj)
 
+	def apply_mwc(self, mwc):
+		for obj in scene.objects:
+			obj.apply_transformation(mwc)
+
 '''
 	def set_camera(self, coordinates, look_at, window_parameters):
 		self.camera = Camera.__init__(coordinates, look_at)
