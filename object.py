@@ -17,6 +17,8 @@ class Vector(object):
 		self.coordinates[-1] = 0
 		return self
 
+	#def find
+
 
 class Face:
 	def __init__(self, face_id, points):
@@ -50,3 +52,14 @@ class Object:
 	def apply_transformation(self, matrix):
 		for p in self.vertices:
 			p = np.dot(matrix, p)
+
+	def aura_interception (self, ):
+
+	def backface_culling(self, Pij):
+		faces_list = []
+		ray = Vector.__init__([0, 0, 0, 1], Pij).calculate_normal()
+		for f in self.faces:
+			v = f.calculate_normal
+			if np.dot(v, ray) < 0
+				faces_list.append(f)
+		return faces_list

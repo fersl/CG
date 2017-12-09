@@ -35,8 +35,14 @@ class Camera(object):
 						[self.i[2], self.j[2], self.k[2], self.position[2]],
 						[0, 0, 0, 1]])
 
-	def build_window(d, n, m, W, H):
+	def build_window(params):
 		points_window = np.matlib.zeros(n, m)
+		
+		d = params[0]
+		n = params[1]
+		m = params[2]
+		W = params[3]
+		H = params[4]
 
 		deltaX = W / m 
 		deltaY = H / n
