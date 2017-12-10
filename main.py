@@ -1,3 +1,5 @@
+#chamar esse arquivo de raycast, criar outro arquivo com as funções para exibir cena na tela, e criar outro arquivo main para unir tudo  e chamar essas funções na ordem certa? ou só criar outro arquivo com as funções de exibição e chamar as funções aqui? ou só juntar tudo aqui?
+#segunda opção??
 import numpy as numpy
 import object
 import camera
@@ -9,6 +11,7 @@ import transformations
 light_coordinates = []
 camera_coordinates = []
 look_at = []
+avup = []
 
 ###		WINDOW PARAMETERS	 ###
 d = 
@@ -24,14 +27,13 @@ def raycast_intersection(window, scene):
 	new_window = np.matlib.zeros(n, m)
 
 	for pixel in window.flat:
-		pixel = pixel.to_vector()
+		ray = pixel.to_vector()
 
 		for obj in scene.objects:
-			#verificar se existe intersecao entre raio e aura do obj, funcao booleana
-			'''
-			if pixel.aura_interception(obj):
+			if obj.aura_interception(pixel):
 				visible_faces = obj.backface_culling(pixel)
-
+			
+			'''
 				for face in visible_faces:
 					#caculate interception, then check if t is smaller than the one currently in auxiliary variable (checks if point is in front of the others)
 					#make dictinary of intersection points, t is used as key

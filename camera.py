@@ -1,11 +1,11 @@
 import numpy as np
-from object import Point, Vector
+from Objects.object import Point, Vector
 
 class Camera(object):
-	def __init__(position, look_at):
+	def __init__(position, look_at, avup):
 		self.position = Point.__init__("camera", position)
 		self.look_at = Point.__init__("look_at", look_at)
-		self.avup = look_at + [0, 0, 1, 0]
+		self.avup = Point.__init__("avup", avup)
 		self.i
 		self.j
 		self.k
@@ -48,9 +48,11 @@ class Camera(object):
 		deltaY = H / n
 
 		for i in range(n):
+			x =  -(W / 2)+(deltaX/2) + j*deltaX
+
 			for j in range(m):
-				x =  -(W / 2)+(deltaX/2) + j*deltaX
 				y = (H/2) - (deltaY/2) - i*deltaY
+
 				points_window[i, j] = [x, y, -d]
 
 		return points_window

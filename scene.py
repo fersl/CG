@@ -1,5 +1,5 @@
 import numpy as numpy
-import object as obj
+from Objects.object import *
 import transformations
 from camera import Camera
 
