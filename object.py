@@ -1,4 +1,3 @@
-#define vertices, faces, e obj
 import numpy as np
 
 class Point(object):
@@ -20,16 +19,14 @@ class Vector(object):
 	def normalize(self):
 		norm = np.linalg.norm(self)
 		self = self / norm
-		self.coordinates[-1] = 0
+		self.coordinates[3] = 0
 		return self
-
-	#def face_interception(self, face):
 
 
 class Face:
 	def __init__(self, face_id, points):
 		self.id = face_id
-		self.points
+		self.points = points
 
 	def calculate_normal(self):
 		v1 = Vector.__init__(self.points[0], self.points[2])
@@ -38,14 +35,22 @@ class Face:
 		n = n.normalize()
 		return n
 
-	#função para verificar se um ponto pertence a face
+	def find_Pin(self, ray):
+		n = self.calculate_normal()
+
+		t = (np.dot(self.points[0], n)) / (np.dot(ray, n))
+		Pin = ray * t
+
+		return [t, Pin]
+
+	#função para verificar se um ponto pertence a face 	//	calcula coordenadas baricentricas
 	#def contains(self, point):
 
 
 class Object:
 	def __init__(self, obj_id):
 		self.id = obj_id
-		#turn lists of vertices and faces into dictionaries using their id as key
+		#turn lists of vertices and faces into dictionaries using their id as key?
 		self.vertices = []
 		self.faces = []
 
@@ -101,15 +106,15 @@ class Object:
 		B = -2 * np.dot(Pij, center)
 		C = (np.dot(center, center)) - (radius**2)
 
-		bhaskara = (B**2) - (4*A*C)
+		delta = (B**2) - (4*A*C)
 
-		if bhaskara < 0:
+		if delta < 0:
 			return False
 		else:
 			return True
 
 	def backface_culling(self, Pij):
-		faces_list = {}
+		faces_list = []
 		ray = Pij.calculate_normal()
 		for f in self.faces:
 			v = f.calculate_normal
@@ -119,4 +124,3 @@ class Object:
 
 
 
-	
