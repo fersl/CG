@@ -1,23 +1,46 @@
-import numpy as numpy
-from Objects.object import *
-import transformations
-from camera import Camera
+import numpy as np
+from Objects import *
+from object import *
+from transformations import *
+from raycast import Punctual_Light, Spot_light
 
 class Scene(object):
-	def __init__(self, light_coords):
-		self.objects = []
-		self.light = obj.Point.__init__("light", light_coords)
-		self.ambient_light = []
-		self.diffuse_light = []
+	def __init__(self):
+		self.objects = {}
+		self.lights = {}
+		self.ambient_light = [0.1, 0.1, 0.1]
 
-'''
-	def add_obj(self, file):
-		obj_id = len(self.objects)+1
-		obj = obj.Object.__init__(obj_id)
-		obj.build()
-		self.objects.append(obj)
-'''
+	def add_light(self, light):
+		light_id = len(self.lights) + 1
+		self.lights[light_id] = light
 
-	def apply_mwc(self, mwc):
-		for obj in scene.objects:
-			obj.apply_transformation(mwc)
+	
+
+"""
+	def ???(self, file):
+		#recebe um arquivo com a descrição da cena e vai criando e adicionando objetos aqui, já com coordenadas finais e material das faces definido
+		#no arquivo declaramos os objetos básicos e aplicamos as devidas transformações para posicioná-los como queremos
+		#fucking materiais. sempre eles.
+
+		#como estruturar o arquivo de descrição da cena para então escrever essa função....
+
+		with open (file) as file:
+			for line in file:
+				line.strip()
+				data = line.split()
+
+				if data[0] == '': continue
+
+				elif data[0] == '#': continue
+
+				elif data[0] == 'o':
+					obj = Object.__init__(data[1])
+					obj.build(data[2])
+					self.objects[data[1]] = obj
+
+					#descrição das transformações aplicadas ao objeto?
+					#descrição das cores
+
+"""
+
+	

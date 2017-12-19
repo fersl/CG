@@ -1,6 +1,13 @@
 import numpy as np
 import math
 
+def compose_transformations(tr_list):
+	matrix = np.eye(4)
+
+	for tr in tr_list:
+		matrix = np.dot(tr, matrix)
+
+	return matrix
 
 ###		ESCALA		###
 

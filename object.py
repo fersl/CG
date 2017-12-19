@@ -10,6 +10,7 @@ class Point(object):
 		return vector
 
 
+
 class Vector(object):
 	def __init__(self, point1, point2):
 		self.point1 = point1
@@ -23,10 +24,21 @@ class Vector(object):
 		return self
 
 
-class Face:
-	def __init__(self, face_id, points):
+
+class Material(object):
+	def __init__(self, k_a, k_d, k_s, m):
+		self.m = m
+		self.k_a = k_a
+		self.k_d = k_d
+		self.k_s = k_s
+
+
+
+class Face(object):
+	def __init__(self, face_id, points, material):
 		self.id = face_id
 		self.points = points
+		#self.material = material 
 
 	def calculate_normal(self):
 		v1 = Vector.__init__(self.points[0], self.points[2])
@@ -39,48 +51,89 @@ class Face:
 		n = self.calculate_normal()
 
 		t = (np.dot(self.points[0], n)) / (np.dot(ray, n))
-		Pin = ray * t
+		Pin = ray * t 
 
-		return [t, Pin]
+		return [t, n, Pin]
 
-	#função para verificar se um ponto pertence a face 	//	calcula coordenadas baricentricas
-	#def contains(self, point):
+	def contains(self, point):
+		n = self.calculate_normal()
+
+		w1 = Vector.__init__(point, self.points[0])
+		w2 = Vector.__init__(point, self.points[1])
+		w3 = Vector.__init__(point, self.points[2])
+
+		n1 = np.cross(w1, w2)
+		n2 = np.cross(w2, w3)
+		n3 = np.cross(w3, w1)
+
+		d1 = np.dot(n, w1)
+		d2 = np.dot(n, w2)
+		d3 = np.dot(n, w3)
+
+		if d1 > 0:
+			if d2 > 0:
+				if d3 > 0:
+					return True
+		return False
 
 
-class Object:
+
+class Object(object):
 	def __init__(self, obj_id):
 		self.id = obj_id
-		#turn lists of vertices and faces into dictionaries using their id as key?
-		self.vertices = []
-		self.faces = []
+		self.vertices = {}
+		self.faces = {}
 
 	def add_vertice(self, x, y, z):
-		vertice_id = "v"+len(self.vertices)+1
+		vertice_id = len(self.vertices)+1
 		vertice = Point.__init__(vertice_id, [x, y, z, 1])
-		self.vertices.append(vertice)
-		#self.vertices[vertice_id] = vertice
+		self.vertices[vertice_id] = vertice
 
-	def add_face(self, p1, p2, p3):
-		face_id = "f"+len(self.faces)+1
-		face = Face.__init__(face_id, [p1, p2, p3])
-		self.faces.append(face)
-		#self.faces[face_id] = face
+	def add_face(self, p1, p2, p3, material):
+		face_id = len(self.faces)+1
+		face = Face.__init__(face_id, [p1, p2, p3], material)
+		self.faces[face_id] = face
 
 	def apply_transformation(self, matrix):
 		for p in self.vertices:
 			p = np.dot(matrix, p)
 
-	#def build(self, file):
+"""
+### TO DO: 	adicionar material (ou cor?) as faces
+	def build(self, file):
+		material = "Default"
+
+		with open(file) as file:
+			for line in file:
+				line.strip()
+				data = line.split()
+
+				if data[0] == '': continue
+
+				elif data[0] == '#': continue
+
+				elif data[0] == 'v':
+					vertex = self.add_vertice (float(data[1]), float(data[2]), float(data[3]))
+
+				#elif data[0] == 'usemtl':
+				#	material = data[1]
+
+
+
+				elif data[0] == 'f':
+					self.add_face(self.vertices[data[1]], self.vertices[data[2]], self.vertices[data[3]], material)
+#"""
+
 
 	def aura_interception(self, Pij):
-		x_max = 999999
-		x_min = -999999
+		x_max = -999999
+		x_min = 999999
 
-		y_max = 999999
-		y_min = -999999
+		y_max = -999999
+		y_min = 999999
 
-		z_max = 999999
-		z_min = -999999
+		z_max = -999999
+		z_min = 999999
 
 		for i in self.vertices:
 			if x_max < i.coordinates[0]:
@@ -121,6 +174,3 @@ class Object:
 			if np.dot(v, ray) < 0:
 				faces_list.append(f)
 		return faces_list
-
-
-
