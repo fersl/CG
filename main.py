@@ -1,50 +1,49 @@
-
-###		TO DO 	  ###
-# montar cena
-
-# calcular cores e iluminação e sombra
-# montar funções para exibição da cena na tela
-
-# adicionar perspectiva à janela de visualização
-
 import numpy as np
 import matplotlib.pyplot as plt
-import mpl_toolkits.mplot3d as mp3d
-from basic_elements import *
 from raycast import *
-import scene
+from scene import *
+from elements import *
+import random
 
-"""
-###		SCENE PARAMETERS	###
-#scene_model = 			#file containing scene description
-light_coordinates = []
-camera_coordinates = []
-look_at = []
-avup = []
-"""
+###		CAMERA		###
+camera_coordinates = [-5.0, 15.0, -20.0]
+camera = Point('camera', camera_coordinates[0], camera_coordinates[1], camera_coordinates[2])
+look_at = [5.0, 5.0, -5.0]
+avup = [5.0, 6.0, -5.0]
 
-"""
-###		WINDOW PARAMETERS	 ###
-d = 
-W = 
-H = 
-n = 
-m = 
+
+###		WINDOW		###
+d = 0.5
+W = 1
+H = 1
+n = 100
+m = 100
 window_params = [d, n, m, W, H]
-"""
+
+###		RGB TEST	###
+
+rgb_array_test = np.zeros((n, m, 3))
+for i in range(n):
+	for j in range(m):
+		r = random.randint(0, 255)
+		g = random.randint(0, 255)
+		b = random.randint(0, 255)
+		rgb_array_test[i, j] = [r/255, g/255, b/255]
 
 
+###		BUILDING SCENE		###
 
-##	BUILDING SCENE AND SETTING CAMERA 	##
-# scene = Scene.__init__()		#this should build scene and return a list of objects
+scene = Scene()
+camera_obj = Camera(camera_coordinates, look_at, avup)
+mwc = camera_obj.world_to_camera_matrix()
+scene = apply_mcw(mwc, scene)
 
-camera = Camera.__init__(camera_coordinates, look_at, avup)
+###		BUILDING WINDOW		###
+window = Window(window_params).get_window()
+rgb_array = render(window, scene, camera, n, m)
 
-wc_matrix = camera.world_to_camera_matrix()
-Raycast.apply_mwc(wc_matrix, scene)
-
-visualization_window = Raycast.build_window(window_params)
-points_window = Raycast.intersection_window(visualization_window, scene)
-colors_window = Raycast.color_window(points_window, scene)
-
-# use colors_window here to print scene to screen
+plt.subplot(211)
+plt.imshow(rgb_array_test)
+plt.subplot(212)
+plt.imshow(rgb_array)
+plt.show()

@@ -1,141 +1,118 @@
 import numpy as np
-from basic_elements import *
+from elements import *
 
 
-class Camera(object):
-    def __init__(position, look_at, avup):
-        self.position = Point.__init__("camera", position)
-        self.look_at = Point.__init__("look_at", look_at)
-        self.avup = Point.__init__("avup", avup)
-        self.i = []
-        self.j = []
-        self.k = []
-
-    def calculate_axis():
-        z = Vector.__init__(look_at, position)
-        self.k = z.normalize()
-        vup = Vector.__init__(position, avup)
-        vup = vup.normalize()
-        x = np.cross(vup, self.k)
-        self.i = x.normalize
-        y = n.cross(self.k, self.i)
-        self.j = y.normalize
-        return [self.i, self.j, self.k]
-
-    def world_to_camera_matrix():
-        return np.array([
-            [self.i[0], self.i[1], self.i[2], -np.dot(self.i, self.position)],
-            [self.j[0], self.j[1], self.j[2], -
-             np.dot(self.j, self.position)],
-            [self.k[0], self.k[1], self.k[2], -
-             np.dot(self.k, self.position)],
-            [0, 0, 0, 1]])
-
-    def camera_to_world_matrix():
-        return np.array([
-            [self.i[0], self.j[0], self.k[0], self.position[0]],
-            [self.i[1], self.j[1],
-             self.k[1], self.position[1]],
-            [self.i[2], self.j[2],
-             self.k[2], self.position[2]],
-            [0, 0, 0, 1]])
+def apply_mwc(matrix_wc, scene):
+    for obj in scene.objects:
+        obj.apply_transformation(matrix_wc)
+    return scene
 
 
-class Punctual_Light(object):
-    def __init__(self, Id, Is, coordinates):
-        self.diffuse = Id
-        self.specular = Is
-        self.coordinates = coordinates
+def apply_mcw(matrix_cw, scene):
+    for obj in scene.objects:
+        obj.apply_transformation(matrix_cw)
+    return scene
 
 
-class Spot_light(object):
-    def __init__(self, Id, Is, coordinates, angle):
-        self.diffuse = Id
-        self.specular = Is
-        self.coordinates = coordinates
-        # self.angle
-        # self.normal
+def render(window, scene, camera, n, m):
+    rgb_array = np.zeros((n, m, 3))
 
+    for i in range(n):
+        for j in range(m):
+            rgb_array[i, j] = scene.background_color 
 
-class Raycast(object):
-    def __init__(self):
-        self.ambient_light = [0.1, 0.1, 0.1]
+            x = window[i, j][0]
+            y = window[i, j][1]
+            z = window[i, j][2]
+            pixel = Point('p', x, y, z)
 
-    def apply_mwc(self, mwc, scene):
-        for obj in scene:
-            obj.apply_transformation(mwc)
-
-    def apply_mcw(self, mcw, scene):
-        for obj in scene:
-            obj.apply_transformation(mcw)
-
-    def build_window(params):
-        points_window = np.matlib.zeros(n, m)
-
-        d = params[0]
-        n = params[1]
-        m = params[2]
-        W = params[3]
-        H = params[4]
-
-        deltaX = W / m
-        deltaY = H / n
-
-        for i in range(n):
-            x = -(W / 2) + (deltaX / 2) + j * deltaX
-
-            for j in range(m):
-                y = (H / 2) - (deltaY / 2) - i * deltaY
-
-                points_window[i, j] = [x, y, -d]
-
-        return points_window
-
-    def intersection_window(self, window, scene):
-        intersection_window = np.matlib.zeros(n, m)
-
-        for pixel in window.flat:
             ray = pixel.to_vector()
-            #ray = ray.normalize()
-            # [t, normal_of_face, Pin, material]
-            Pin = [999999, None, None, None]
+            ray = ray.normalize()
 
-            for obj in scene:
-                if obj.aura_interception(pixel):
-                    visible_faces = obj.backface_culling(pixel)
+            t = 999999
+            for obj in scene.objects:
+                if obj.intercepts_aura(ray):
+                    #print ("achei uma intersecao com aura")
+                    visible_faces = obj.backface_culling(ray)
 
                     for face in visible_faces:
-                        aux = face.find_Pin(ray)
+                        Pin = face.get_Pin(ray)
 
-                        if face.contains(aux[2]):
-                            if aux[0] < Pin[0]:
-                                Pin = aux
-            pixel = [Point.__init__("p", Pin[2]), Pin[1], Pin[3]]
+                        if face.contains(Pin):
+                            #print ("achei uma intercao com objeto")
+                            n = face.get_normal()
+                            v = face.points[0]
+                            new_t = np.dot(v.coordinates, n.coordinates) / np.dot(pixel.coordinates, n.coordinates)
+                            if new_t < t:
+                                #print ("calculando rgb do ponto")
 
-        return intersection_window
+                                #CALCULANDO RGB DO PONTO Pin
+                                v = Vector(Pin, camera)
+                                f = Pin.get_face()
+                                n = f.get_normal()
 
-    def color_window(self, points_window, scene):
-        #light = scene.light
-        color_window = np.matlib.zeros(n, m)
+                                Ka = Pin.material.k_a
+                                Ia = [Ka[0] * scene.ambient_light[0],
+                                    Ka[1] * scene.ambient_light[1],
+                                    Ka[2] * scene.ambient_light[2]]
+                                color = np.array(Ia)
 
-        for pixel in points_window.flat:
-            v = pixel.to_vector()
-            v = v.normalize()
-            n = pixel[1]
+                                for light in scene.lights:
+                                    light_source = Point('', light.position[0], light.position[1], light.position[2])
 
-            for light in scene.lights:
-                l = Vector.__init__(pixel, light)
-                l = l.normalize()
-                r = ((2 * np.dot(n, l)) * n) - l
-                r = r.normalize(y)
+                                    l = Vector(Pin, light_source)
+                                    l_normal = l.normalize()
+                                    r = ((2 * np.dot(n, l_normal)) * n) - l_normal
+                                    r_normal = r.normalize()
+                                    # procurar intersecao entre l e algum obj do cenario
+                                    intersection = False
+                                    for obj in scene.objects:
+                                        if obj.intercepts(l):
+                                            intersection = True
+                                            break
 
-            # calcular rgb aqui
-            '''
-			Ia = 
-			Id = 
-			Is = 
+                                    if not intersection:
+                                        # calcula Id, Is e soma a color
+                                        diffuse_attenuation = np.dot(n.coordinates, l.coordinates)
+                                        Kd = window[i, j].material.k_d
+                                        Id = [diffuse_attenuation * Kd[0] * light.diffuse[0],
+                                            diffuse_attenuation * Kd[1] * light.diffuse[1],
+                                            diffuse_attenuation * Kd[2] * light.diffuse[2]]
 
-			Ipixel = Ia + Id + Is
-			'''
+                                        color = color + np.array(Id)
 
-        return color_window
+                                        m = Pin.material.m
+                                        specular_attenuation = np.dot(v.coordinates, r.coordinates) ** m
+                                        Is = [Ks[0] * light.specular[0] * specular_attenuation,
+                                            Ks[1] * light.specular[1] * specular_attenuation,
+                                            Ks[2] * light.specular[2] * specular_attenuation]
+                                        
+                                        color = color + np.array(Is)
+                                rgb_array[i, j] = color
+
+    return rgb_array
+
+
+
+class Window():
+    def __init__(self, params):
+        self.d = params[0]
+        self.n = params[1]
+        self.m = params[2]
+        self.W = params[3]
+        self.H = params[4]
+
+        self.deltaX = self.W / self.m
+        self.deltaY = self.H / self.n
+
+        self.window = np.zeros((self.n, self.m, 3))
+
+        for i in range(self.n):
+            for j in range(self.m):
+                x = -(self.W / 2) + (self.deltaX / 2) + j * self.deltaX
+                y = (self.H / 2) - (self.deltaY / 2) - i * self.deltaY
+
+                self.window[i, j] = [x, y, -self.d]
+
+    def get_window(self):
+        return self.window
